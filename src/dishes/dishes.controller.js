@@ -73,6 +73,17 @@ const priceIsMoreThanZero = (req, res, next) => {
   }
   next();
 };
+const dishHasAName = (req, res, next) => {
+  const { data: { name } = {} } = req.body;
+  if (name) {
+    next();
+    return;
+  }
+  return next({
+    status: 400,
+    message: `A name is required for the dish`,
+  });
+};
 
 module.exports = {
   list,
@@ -82,6 +93,7 @@ module.exports = {
     dishBodyDataHas("image_url"),
     dishBodyDataHas("price"),
     priceIsMoreThanZero,
+    dishHasAName,
     create,
   ],
   read: [dishExists, read],
@@ -92,6 +104,7 @@ module.exports = {
     dishBodyDataHas("image_url"),
     dishBodyDataHas("price"),
     priceIsMoreThanZero,
+    dishHasAName,
     update,
   ],
 };
