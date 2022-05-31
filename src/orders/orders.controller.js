@@ -104,23 +104,33 @@ const orderHasDishes = (req, res, next) => {
   }
 };
 const dishValidation = (req, res, next) => {
-  const { data: { dishes } = {} } = req.body;
+  const {
+    data: { dishes },
+  } = req.body;
 
-  const quantityIsValid = dishes.every((dish) => {
-    console.log(dish.quantity > 0);
-    console.log(Number.isInteger(dish.quantity));
-    return true;
-  });
-
-  if (quantityIsValid) {
-    return next();
-  } else {
-    return {
-      status: 400,
-      message: `Dish quantity must be an integer number that is more than zero`,
-    };
+  for (const dish of dishes) {
+    if (!dish.quantity || !Number.isInteger(dish.quantity)) {
+      return next({
+        status: 400,
+        message: `Dish ${dishes.indexOf(
+          dish
+        )} must have a quantity that is an integer greater than 0`,
+      });
+    }
   }
+  return next();
+  //   const dishValidate = dishes.some((dish) => {
+  //     if (!dish.quantity && Number.isInteger(dish.quantity)) {
+  //       return next({
+  //         status: 400,
+  //         message: `Dish quantity must be an integer number that is more than zero`,
+  //       });
+  //     } else {
+  //       return next();
+  //     }
+  //   });
 };
+
 const updateOrderIdIsValid = (req, res, next) => {
   const { data: { id } = {} } = req.body;
   const order = res.locals.order;
