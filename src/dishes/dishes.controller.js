@@ -63,6 +63,17 @@ const dishBodyDataHas = (propertyName) => {
   };
 };
 
+const priceIsMoreThanZero = (req, res, next) => {
+  const { data: { price } = {} } = req.body;
+  if (price <= 0 || !Number.isInteger(price)) {
+    return next({
+      status: 400,
+      message: `The price needs to be more than 0 and an integer`,
+    });
+  }
+  next();
+};
+
 module.exports = {
   list,
   create: [
@@ -70,6 +81,7 @@ module.exports = {
     dishBodyDataHas("description"),
     dishBodyDataHas("image_url"),
     dishBodyDataHas("price"),
+    priceIsMoreThanZero,
     create,
   ],
   read: [dishExists, read],
@@ -79,6 +91,7 @@ module.exports = {
     dishBodyDataHas("description"),
     dishBodyDataHas("image_url"),
     dishBodyDataHas("price"),
+    priceIsMoreThanZero,
     update,
   ],
 };
