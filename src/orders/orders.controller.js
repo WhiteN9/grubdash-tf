@@ -19,7 +19,7 @@ const create = (req, res) => {
     id: nextId(),
   };
   orders.push(newOrder);
-  res.send(status).json({ data: newOrder });
+  res.status(201).json({ data: newOrder });
 };
 
 const read = (req, res) => {
@@ -46,7 +46,7 @@ const orderExists = (req, res, next) => {
 
 const orderHasProperty = (propertyName) => {
   return (req, res, next) => {
-    const { data } = req.body;
+    const { data = {} } = req.body;
     if (data[propertyName]) {
       return next();
     } else {
@@ -64,9 +64,6 @@ const orderHasADish = (req, res, next) => {};
 module.exports = {
   list,
   create: [
-    orderHasProperty("deliverTo"),
-    orderHasProperty("mobileNumber"),
-    orderHasProperty("status"),
     create,
   ],
   read: [orderExists, read],
