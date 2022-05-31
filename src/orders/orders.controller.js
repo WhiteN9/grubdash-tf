@@ -7,23 +7,40 @@ const orders = require(path.resolve("src/data/orders-data"));
 const nextId = require("../utils/nextId");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
-const list = (req,res) => {
-    res.json({data:orders})
-}
+const list = (req, res) => {
+  res.json({ data: orders });
+};
 
-const create = (req,res) => {
+const create = (req, res) => {
+  res.json({});
+};
 
-}
+const read = (req, res) => {};
 
-const read = (req,res) => {
+const update = (req, res) => {};
 
-}
+const destroy = (req, res) => {};
 
-const update = (req,res) => {
-
-}
-
-const destroy = (req,res) => {
-
-}
-module.exports = {list,create,read,update,delete:[destroy]}
+const orderExists = (req, res, next) => {
+  const orderId = req.params.orderId;
+  const orderFound = orders.find((order) => orderId === order.id);
+  if (orderFound) {
+    res.locals.order = orderFound;
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `The order id ${orderId} was not found`,
+    });
+  }
+};
+const a = (req, res, next) => {};
+const b = (req, res, next) => {};
+const c = (req, res, next) => {};
+module.exports = {
+  list,
+  create,
+  read: [orderExists, read],
+  update: [orderExists, update],
+  delete: [destroy],
+};
