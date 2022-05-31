@@ -50,10 +50,10 @@ const orderHasProperty = (propertyName) => {
     if (data[propertyName]) {
       return next();
     } else {
-      return {
+      return next({
         status: 400,
-        message: `Order is missing ${propertyName}`,
-      };
+        message: `Must include a ${propertyName}`,
+      });
     }
   };
 };
@@ -64,6 +64,9 @@ const orderHasADish = (req, res, next) => {};
 module.exports = {
   list,
   create: [
+    orderHasProperty("deliverTo"),
+    orderHasProperty("mobileNumber"),
+    orderHasProperty("status"),
     create,
   ],
   read: [orderExists, read],
