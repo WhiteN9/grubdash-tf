@@ -74,7 +74,7 @@ const orderHasProperty = (propertyName) => {
 const orderStatusIsValid = (req, res, next) => {
   const { data: { status } = {} } = req.body;
   const order = res.locals.order;
-  if (status === "delivered" && status === order.status) {
+  if (status === "delivered") {
     return next({
       status: 400,
       message: `A delivered order cannot be changed`,
@@ -82,8 +82,7 @@ const orderStatusIsValid = (req, res, next) => {
   } else if (
     status === "pending" ||
     status === "preparing" ||
-    status === "out-for-delivery" ||
-    status === "delivered"
+    status === "out-for-delivery"
   ) {
     return next();
   } else {
@@ -122,7 +121,6 @@ const dishValidation = (req, res, next) => {
     };
   }
 };
-
 const updateOrderIdIsValid = (req, res, next) => {
   const { data: { id } = {} } = req.body;
   const order = res.locals.order;
@@ -135,13 +133,12 @@ const updateOrderIdIsValid = (req, res, next) => {
     });
   }
 };
-
 const deleteRequestIsValid = (req, res, next) => {
   const { data: { status } = {} } = req.body;
   if (status !== "pending") {
     return next({
       status: 400,
-      message: `Cannot remove order that is in preparing, out-for-delivery, or delivered.`,
+      message: `Cannot remove order that is not in pending.`,
     });
   } else {
     return next();
@@ -162,14 +159,12 @@ module.exports = {
     orderExists,
     orderHasProperty("deliverTo"),
     orderHasProperty("mobileNumber"),
-    orderHasProperty("status"),
     orderHasProperty("dishes"),
     updateOrderIdIsValid,
     orderStatusIsValid,
     orderHasDishes,
     dishValidation,
-    deleteRequestIsValid,
     update,
   ],
-  delete: [orderExists, destroy],
+  delete: [orderExists, deleteRequestIsValid, destroy],
 };
