@@ -38,7 +38,12 @@ const update = (req, res) => {
   res.json({ data: order });
 };
 
-const destroy = (req, res) => {};
+const destroy = (req, res) => {
+  const orderId = req.params.orderId;
+  const orderIndex = orders.find((order) => Number(orderId) === order.id);
+  orders.splice(orderIndex, 1);
+  res.sendStatus(204);
+};
 
 const orderExists = (req, res, next) => {
   const orderId = req.params.orderId;
@@ -48,7 +53,7 @@ const orderExists = (req, res, next) => {
     return next();
   } else {
     return next({
-      status: 400,
+      status: 404,
       message: `The order id ${orderId} was not found`,
     });
   }
@@ -103,8 +108,8 @@ const dishValidation = (req, res, next) => {
   const { data: { dishes } = {} } = req.body;
 
   const quantityIsValid = dishes.every((dish) => {
-    console.log(dish.quantity > 0)
-    console.log(Number.isInteger(dish.quantity))
+    console.log(dish.quantity > 0);
+    console.log(Number.isInteger(dish.quantity));
     return true;
   });
 
@@ -130,7 +135,6 @@ const updateOrderIdIsValid = (req, res, next) => {
     });
   }
 };
-
 module.exports = {
   list,
   create: [
@@ -154,5 +158,5 @@ module.exports = {
     dishValidation,
     update,
   ],
-  delete: [destroy],
+  delete: [orderExists, destroy],
 };
