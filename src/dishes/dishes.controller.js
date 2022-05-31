@@ -95,7 +95,17 @@ const dishDescriptionIsValid = (req, res, next) => {
     message: `A description of the dish is required`,
   });
 };
-
+const dishImageURLIsValid = (req, res, next) => {
+  const { data: { image_url } = {} } = req.body;
+  if (image_url) {
+    next();
+    return;
+  }
+  return next({
+    status: 400,
+    message: `An image url of the dish is required`,
+  });
+};
 module.exports = {
   list,
   create: [
@@ -106,6 +116,7 @@ module.exports = {
     priceIsMoreThanZero,
     dishHasAName,
     dishDescriptionIsValid,
+    dishImageURLIsValid,
     create,
   ],
   read: [dishExists, read],
@@ -118,6 +129,7 @@ module.exports = {
     priceIsMoreThanZero,
     dishHasAName,
     dishDescriptionIsValid,
+    dishImageURLIsValid,
     update,
   ],
 };
