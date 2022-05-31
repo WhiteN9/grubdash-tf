@@ -52,9 +52,33 @@ const dishExists = (req, res, next) => {
   });
 };
 
+const dishBodyDataHas = (propertyName) => {
+  return (req, res, next) => {
+    const { data = {} } = req.body;
+    if (data[propertyName]) {
+      next();
+      return;
+    }
+    next({ status: 400, message: `Must include a ${propertyName}` });
+  };
+};
+
 module.exports = {
   list,
-  create: [create],
+  create: [
+    dishBodyDataHas("name"),
+    dishBodyDataHas("description"),
+    dishBodyDataHas("image_url"),
+    dishBodyDataHas("price"),
+    create,
+  ],
   read: [dishExists, read],
-  update: [dishExists, update],
+  update: [
+    dishExists,
+    dishBodyDataHas("name"),
+    dishBodyDataHas("description"),
+    dishBodyDataHas("image_url"),
+    dishBodyDataHas("price"),
+    update,
+  ],
 };
