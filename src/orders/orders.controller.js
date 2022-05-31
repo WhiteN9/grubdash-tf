@@ -33,7 +33,7 @@ const update = (req, res) => {
   order.deliverTo = deliverTo;
   order.mobileNumber = mobileNumber;
   order.status = status;
-  order.dishes = dish;
+  order.dishes = dishes;
 
   res.json({ data: order });
 };
@@ -134,6 +134,7 @@ const dishValidation = (req, res, next) => {
 const updateOrderIdIsValid = (req, res, next) => {
   const { data: { id } = {} } = req.body;
   const order = res.locals.order;
+  console.log(id);
   if (id === null || id === undefined || !id || id === order.id) {
     return next();
   } else {
