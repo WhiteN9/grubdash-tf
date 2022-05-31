@@ -26,7 +26,17 @@ const read = (req, res) => {
   res.json({ data: res.locals.order });
 };
 
-const update = (req, res) => {};
+const update = (req, res) => {
+  const { data: { deliverTo, mobileNumber, status, dishes } = {} } = req.body;
+  const order = res.locals.order;
+
+  order.deliverTo = deliverTo;
+  order.mobileNumber = mobileNumber;
+  order.status = status;
+  order.dishes = dish;
+
+  res.json({ data: order });
+};
 
 const destroy = (req, res) => {};
 
