@@ -26,6 +26,18 @@ const read = (req, res) => {
   res.json({ data: res.locals.dish });
 };
 
+const update = (req, res) => {
+  const { data: { name, description, price, image_url } = {} } = req.body;
+  const dish = res.locals.dish;
+
+  dish.name = name;
+  dish.description = description;
+  dish.price = price;
+  dish.image_url = image_url;
+
+  res.json({ data: dish });
+};
+
 const dishExists = (req, res, next) => {
   const dishId = req.params.dishId;
   const dishFound = dishes.find((dish) => dish.id === dishId);
@@ -44,4 +56,5 @@ module.exports = {
   list,
   create: [create],
   read: [dishExists, read],
+  update: [dishExists, update],
 };
