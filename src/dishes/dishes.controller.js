@@ -8,6 +8,20 @@ const list = (req, res) => {
   res.json({ data: dishes });
 };
 
+const create = (req, res) => {
+  console.log(nextId);
+  const { data: { name, description, price, image_url } = {} } = req.body;
+  const newDish = {
+    name,
+    description,
+    price,
+    image_url,
+    id: nextId(),
+  };
+  dish.push(newDish);
+  res.status(201).json({ data: newDish });
+};
+
 const read = (req, res) => {
   res.json({ data: res.locals.dish });
 };
@@ -25,7 +39,9 @@ const dishExists = (req, res, next) => {
     message: `Dish ID not found: ${dishId}`,
   });
 };
+
 module.exports = {
   list,
+  create: [create],
   read: [dishExists, read],
 };
