@@ -8,7 +8,19 @@ const list = (req, res) => {
   res.json({ data: orders });
 };
 
-const create = (req, res) => {};
+const create = (req, res) => {
+  const { data: { deliverTo, mobileNumber, status, dishes } = {} } = req.body;
+
+  const newOrder = {
+    deliverTo,
+    mobileNumber,
+    status,
+    dishes,
+    id: nextId(),
+  };
+  orders.push(newOrder);
+  res.send(status).json({ data: newOrder });
+};
 
 const read = (req, res) => {
   res.json({ data: res.locals.order });
@@ -31,13 +43,39 @@ const orderExists = (req, res, next) => {
     });
   }
 };
-const a = (req, res, next) => {};
-const b = (req, res, next) => {};
-const c = (req, res, next) => {};
+
+const orderHasProperty = (propertyName) => {
+  return (req, res, next) => {
+    const { data } = req.body;
+    if (data[propertyName]) {
+      return next();
+    } else {
+      return {
+        status: 400,
+        message: `Order is missing ${propertyName}`,
+      };
+    }
+  };
+};
+const orderHasDeliverTo = (req, res, next) => {};
+const orderHasMobileNumber = (req, res, next) => {};
+const orderHasDishes = (req, res, next) => {};
+const orderHasADish = (req, res, next) => {};
 module.exports = {
   list,
-  create,
+  create: [
+    orderHasProperty("deliverTo"),
+    orderHasProperty("mobileNumber"),
+    orderHasProperty("status"),
+    create,
+  ],
   read: [orderExists, read],
-  update: [orderExists, update],
+  update: [
+    orderExists,
+    orderHasProperty("deliverTo"),
+    orderHasProperty("mobileNumber"),
+    orderHasProperty("status"),
+    update,
+  ],
   delete: [destroy],
 };
