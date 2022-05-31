@@ -54,6 +54,19 @@ const orderExists = (req, res, next) => {
   }
 };
 
+const updateOrderIdIsValid = (req, res, next) => {
+  const { data: { id } = {} } = req.body;
+  const order = res.locals.order;
+  if (id === null || id === undefined || !id || id === order) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `The requested id ${id} does not match with the current order id${order.id}`,
+    });
+  }
+};
+
 const orderHasProperty = (propertyName) => {
   return (req, res, next) => {
     const { data = {} } = req.body;
@@ -77,6 +90,7 @@ module.exports = {
     orderHasProperty("deliverTo"),
     orderHasProperty("mobileNumber"),
     orderHasProperty("status"),
+    orderHasProperty("dishes"),
     create,
   ],
   read: [orderExists, read],
@@ -85,6 +99,8 @@ module.exports = {
     orderHasProperty("deliverTo"),
     orderHasProperty("mobileNumber"),
     orderHasProperty("status"),
+    orderHasProperty("dishes"),
+    updateOrderIdIsValid,
     update,
   ],
   delete: [destroy],
