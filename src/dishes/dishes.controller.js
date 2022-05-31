@@ -28,15 +28,7 @@ const read = (req, res) => {
 const update = (req, res, next) => {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const dish = res.locals.dish;
-  // console.log(dish.id, typeof(dish.id));
-  // console.log("update request", id, typeof(id))
-  // console.log(id !== dish.id)
-  if (dish.id !== id) {
-    return next({
-      status: 400,
-      message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
-    });
-  }
+
   dish.name = name;
   dish.description = description;
   dish.price = price;
@@ -57,6 +49,19 @@ const dishExists = (req, res, next) => {
     status: 404,
     message: `Dish ID not found: ${dishId}`,
   });
+};
+
+const dishDataIdIsValid = (req, res, next) => {
+  const { data: { id } = {} } = req.body;
+  const dish = res.locals.dish;
+  if (id === null || id === undefined || !id || id === dish.id) {
+    return next();
+  } else if (id !== dish.id) {
+    return next({
+      status: 400,
+      message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
+    });
+  }
 };
 
 const dishBodyDataHas = (propertyName) => {
@@ -136,6 +141,7 @@ module.exports = {
     dishHasAName,
     dishDescriptionIsValid,
     dishImageURLIsValid,
+    dishDataIdIsValid,
     update,
   ],
 };
