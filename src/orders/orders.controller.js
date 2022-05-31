@@ -9,14 +9,14 @@ const list = (req, res) => {
 };
 
 const create = (req, res) => {
-  const { data: { deliverTo, mobileNumber, status, dishes } = {} } = req.body;
-
+  const { data: { deliverTo, mobileNumber, status, dishes, id } = {} } =
+    req.body;
   const newOrder = {
     deliverTo,
     mobileNumber,
-    status,
+    status: "pending",
     dishes,
-    id: nextId(),
+    id: id ? id : nextId(),
   };
   orders.push(newOrder);
   res.status(201).json({ data: newOrder });
@@ -54,19 +54,6 @@ const orderExists = (req, res, next) => {
   }
 };
 
-const updateOrderIdIsValid = (req, res, next) => {
-  const { data: { id } = {} } = req.body;
-  const order = res.locals.order;
-  if (id === null || id === undefined || !id || id === order) {
-    return next();
-  } else {
-    return next({
-      status: 400,
-      message: `The requested id ${id} does not match with the current order id${order.id}`,
-    });
-  }
-};
-
 const orderHasProperty = (propertyName) => {
   return (req, res, next) => {
     const { data = {} } = req.body;
@@ -80,16 +67,48 @@ const orderHasProperty = (propertyName) => {
     }
   };
 };
-const orderHasDeliverTo = (req, res, next) => {};
-const orderHasMobileNumber = (req, res, next) => {};
-const orderHasDishes = (req, res, next) => {};
+
+const orderStatusIsValid = (req, res, next) => {
+  const { data: { status } = {} } = req.body;
+  const order = res.locals.order;
+  if (status === "delivered" && status === order.status) {
+    return next({
+      status: 400,
+      message: `A delivered order cannot be changed`,
+    });
+  } else if (
+    status === "pending" ||
+    status === "preparing" ||
+    status === "out-for-delivery" ||
+    status === "delivered"
+  ) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Order must have a status of pending, preparing, out-for-delivery, delivered`,
+    });
+  }
+};
 const orderHasADish = (req, res, next) => {};
+
+const updateOrderIdIsValid = (req, res, next) => {
+  const { data: { id } = {} } = req.body;
+  const order = res.locals.order;
+  if (id === null || id === undefined || !id || id === order.id) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Order id does not match route id. Order: ${order.id}, Route: ${id}.`,
+    });
+  }
+};
 module.exports = {
   list,
   create: [
     orderHasProperty("deliverTo"),
     orderHasProperty("mobileNumber"),
-    orderHasProperty("status"),
     orderHasProperty("dishes"),
     create,
   ],
@@ -101,6 +120,7 @@ module.exports = {
     orderHasProperty("status"),
     orderHasProperty("dishes"),
     updateOrderIdIsValid,
+    orderStatusIsValid,
     update,
   ],
   delete: [destroy],
