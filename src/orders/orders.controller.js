@@ -99,8 +99,23 @@ const orderHasDishes = (req, res, next) => {
     });
   }
 };
-const dishIsValid = (req, res, next) => {
+const dishValidation = (req, res, next) => {
   const { data: { dishes } = {} } = req.body;
+
+  const quantityIsValid = dishes.every((dish) => {
+    console.log(dish.quantity > 0)
+    console.log(Number.isInteger(dish.quantity))
+    return true;
+  });
+
+  if (quantityIsValid) {
+    return next();
+  } else {
+    return {
+      status: 400,
+      message: `Dish quantity must be an integer number that is more than zero`,
+    };
+  }
 };
 
 const updateOrderIdIsValid = (req, res, next) => {
@@ -123,6 +138,7 @@ module.exports = {
     orderHasProperty("mobileNumber"),
     orderHasProperty("dishes"),
     orderHasDishes,
+    dishValidation,
     create,
   ],
   read: [orderExists, read],
@@ -135,6 +151,7 @@ module.exports = {
     updateOrderIdIsValid,
     orderStatusIsValid,
     orderHasDishes,
+    dishValidation,
     update,
   ],
   delete: [destroy],
