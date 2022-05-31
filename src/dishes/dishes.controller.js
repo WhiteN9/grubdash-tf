@@ -9,16 +9,15 @@ const list = (req, res) => {
 };
 
 const create = (req, res) => {
-  console.log(nextId);
-  const { data: { name, description, price, image_url } = {} } = req.body;
+  const { data: { name, description, price, image_url, id } = {} } = req.body;
   const newDish = {
     name,
     description,
     price,
     image_url,
-    id: nextId(),
+    id: id ? id : nextId(),
   };
-  dish.push(newDish);
+  dishes.push(newDish);
   res.status(201).json({ data: newDish });
 };
 
@@ -26,10 +25,18 @@ const read = (req, res) => {
   res.json({ data: res.locals.dish });
 };
 
-const update = (req, res) => {
-  const { data: { name, description, price, image_url } = {} } = req.body;
+const update = (req, res, next) => {
+  const { data: { name, description, price, image_url, id } = {} } = req.body;
   const dish = res.locals.dish;
-
+  // console.log(dish.id, typeof(dish.id));
+  // console.log("update request", id, typeof(id))
+  // console.log(id !== dish.id)
+  if (dish.id !== id) {
+    return next({
+      status: 400,
+      message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
+    });
+  }
   dish.name = name;
   dish.description = description;
   dish.price = price;
@@ -62,7 +69,6 @@ const dishBodyDataHas = (propertyName) => {
     next({ status: 400, message: `Must include a ${propertyName}` });
   };
 };
-
 const priceIsMoreThanZero = (req, res, next) => {
   const { data: { price } = {} } = req.body;
   if (price <= 0 || !Number.isInteger(price)) {
