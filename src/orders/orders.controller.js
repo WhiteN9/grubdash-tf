@@ -135,6 +135,18 @@ const updateOrderIdIsValid = (req, res, next) => {
     });
   }
 };
+
+const deleteRequestIsValid = (req, res, next) => {
+  const { data: { status } = {} } = req.body;
+  if (status !== "pending") {
+    return next({
+      status: 400,
+      message: `Cannot remove order that is in preparing, out-for-delivery, or delivered.`,
+    });
+  } else {
+    return next();
+  }
+};
 module.exports = {
   list,
   create: [
@@ -156,6 +168,7 @@ module.exports = {
     orderStatusIsValid,
     orderHasDishes,
     dishValidation,
+    deleteRequestIsValid,
     update,
   ],
   delete: [orderExists, destroy],
