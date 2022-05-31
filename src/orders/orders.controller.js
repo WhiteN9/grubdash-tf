@@ -53,7 +53,6 @@ const orderExists = (req, res, next) => {
     });
   }
 };
-
 const orderHasProperty = (propertyName) => {
   return (req, res, next) => {
     const { data = {} } = req.body;
@@ -67,7 +66,6 @@ const orderHasProperty = (propertyName) => {
     }
   };
 };
-
 const orderStatusIsValid = (req, res, next) => {
   const { data: { status } = {} } = req.body;
   const order = res.locals.order;
@@ -90,7 +88,20 @@ const orderStatusIsValid = (req, res, next) => {
     });
   }
 };
-const orderHasADish = (req, res, next) => {};
+const orderHasDishes = (req, res, next) => {
+  const { data: { dishes } = {} } = req.body;
+  if (dishes.length > 0 && Array.isArray(dishes)) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Dishes must be an array and contain more than one dish`,
+    });
+  }
+};
+const dishIsValid = (req, res, next) => {
+  const { data: { dishes } = {} } = req.body;
+};
 
 const updateOrderIdIsValid = (req, res, next) => {
   const { data: { id } = {} } = req.body;
@@ -104,12 +115,14 @@ const updateOrderIdIsValid = (req, res, next) => {
     });
   }
 };
+
 module.exports = {
   list,
   create: [
     orderHasProperty("deliverTo"),
     orderHasProperty("mobileNumber"),
     orderHasProperty("dishes"),
+    orderHasDishes,
     create,
   ],
   read: [orderExists, read],
@@ -121,6 +134,7 @@ module.exports = {
     orderHasProperty("dishes"),
     updateOrderIdIsValid,
     orderStatusIsValid,
+    orderHasDishes,
     update,
   ],
   delete: [destroy],
