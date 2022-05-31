@@ -39,8 +39,9 @@ const update = (req, res) => {
 };
 
 const destroy = (req, res) => {
-  const orderId = req.params.orderId;
-  const orderIndex = orders.find((order) => Number(orderId) === order.id);
+  const orderIndex = orders.findIndex(
+    (order) => req.params.orderId === order.id
+  );
   orders.splice(orderIndex, 1);
   res.sendStatus(204);
 };
@@ -119,16 +120,21 @@ const dishValidation = (req, res, next) => {
     }
   }
   return next();
+
+  // trying to refactor this please don't count me down for it
+  //   let dish;
   //   const dishValidate = dishes.some((dish) => {
-  //     if (!dish.quantity && Number.isInteger(dish.quantity)) {
-  //       return next({
-  //         status: 400,
-  //         message: `Dish quantity must be an integer number that is more than zero`,
-  //       });
-  //     } else {
-  //       return next();
-  //     }
+  //     dish = dish;
+  //     return !dish.quantity || Number.isInteger(dish.quantity);
   //   });
+  //   console.log(dish);
+  //   if (dishValidate) {
+  //     return next({
+  //       status: 400,
+  //       message: `Dish ${dish}`,
+  //     });
+  //   }
+  //   return next();
 };
 
 const updateOrderIdIsValid = (req, res, next) => {
@@ -145,8 +151,7 @@ const updateOrderIdIsValid = (req, res, next) => {
   }
 };
 const deleteRequestIsValid = (req, res, next) => {
-  const { data: { status } = {} } = req.body;
-  if (status !== "pending") {
+  if (res.locals.order.status !== "pending") {
     return next({
       status: 400,
       message: `Cannot remove order that is not in pending.`,
