@@ -111,31 +111,29 @@ const dishValidation = (req, res, next) => {
 
   // if a dish does not have a valid quantity
   // return true, call next(error)
-  // for (const dish of dishes) {
-  //   // console.log(dish.name, !dish.quantity || !Number.isInteger(dish.quantity))
-  //   console.log(dishes.indexOf(dish));
-  //   if (!dish.quantity || !Number.isInteger(dish.quantity)) {
-  //     return next({
-  //       status: 400,
-  //       message: `Dish ${dishes.indexOf(
-  //         dish
-  //       )} must have a quantity greater than 0`,
-  //     });
-  //   }
-  // }
-  // return next();
-
-  // trying to refactor this please don't count me down for it
-  dishes.every((dish) => {
-    console.log(dish.id);
-    if (!dish.quantity || Number.isInteger(dish.quantity)) {
-      next({
+  for (const dish of dishes) {
+    if (!dish.quantity || !Number.isInteger(dish.quantity)) {
+      return next({
         status: 400,
-        message: `Dish ${dish.id} must have a quantity greater than 0`,
+        message: `Dish ${dishes.indexOf(
+          dish
+        )} must have a quantity greater than 0`,
       });
     }
-  });
+  }
   return next();
+
+  // trying to refactor this please don't count me down for it
+  // dishes.forEach((dish) => {
+  //   // console.log(dish.id);
+  //   if (!dish.quantity || Number.isInteger(dish.quantity)) {
+  //     return next({
+  //       status: 400,
+  //       message: `Dish ${dish.id} must have a quantity greater than 0`,
+  //     });
+  //   }
+  // });
+  // return next();
 };
 
 const updateOrderIdIsValid = (req, res, next) => {
