@@ -4,11 +4,15 @@ const orders = require(path.resolve("src/data/orders-data"));
 // Use this function to assigh ID's when necessary
 const nextId = require("../utils/nextId");
 
-const list = (req, res) => {
+/* CRUD functions */
+//lists all the current orders in the data file
+function list(req, res) {
   res.json({ data: orders });
-};
+}
 
-const create = (req, res) => {
+//creates a new order
+//and assigns the order with a passed in id or a randomized id
+function create(req, res) {
   const { data: { deliverTo, mobileNumber, status, dishes, id } = {} } =
     req.body;
   const newOrder = {
@@ -20,13 +24,15 @@ const create = (req, res) => {
   };
   orders.push(newOrder);
   res.status(201).json({ data: newOrder });
-};
+}
 
-const read = (req, res) => {
+//reads an order information
+function read(req, res) {
   res.json({ data: res.locals.order });
-};
+}
 
-const update = (req, res) => {
+//updates an existing order
+function update(req, res) {
   const { data: { deliverTo, mobileNumber, status, dishes } = {} } = req.body;
   const order = res.locals.order;
 
@@ -36,17 +42,20 @@ const update = (req, res) => {
   order.dishes = dishes;
 
   res.json({ data: order });
-};
+}
 
-const destroy = (req, res) => {
+//deletes an order by its index in the data file
+function destroy(req, res) {
   const orderIndex = orders.findIndex(
     (order) => req.params.orderId === order.id
   );
   orders.splice(orderIndex, 1);
   res.sendStatus(204);
-};
+}
 
-const orderExists = (req, res, next) => {
+/* Middlewares */
+//checks if the order exists in the data file
+function orderExists(req, res, next) {
   const orderId = req.params.orderId;
   const orderFound = orders.find((order) => orderId === order.id);
   if (orderFound) {
@@ -58,9 +67,11 @@ const orderExists = (req, res, next) => {
       message: `The order id ${orderId} was not found`,
     });
   }
-};
-const orderHasProperty = (propertyName) => {
-  return (req, res, next) => {
+}
+
+//checks if the order contains the passed in property name
+function orderHasProperty(propertyName) {
+  return function checkProperty(req, res, next) {
     const { data = {} } = req.body;
     if (data[propertyName]) {
       return next();
@@ -71,8 +82,11 @@ const orderHasProperty = (propertyName) => {
       });
     }
   };
-};
-const orderStatusIsValid = (req, res, next) => {
+}
+
+//checks if the request to change order status is a valid status
+//return different functions based on the request status string
+function orderStatusIsValid(req, res, next) {
   const { data: { status } = {} } = req.body;
   const order = res.locals.order;
   if (status === "delivered") {
@@ -92,8 +106,11 @@ const orderStatusIsValid = (req, res, next) => {
       message: `Order must have a status of pending, preparing, out-for-delivery, delivered`,
     });
   }
-};
-const orderHasDishes = (req, res, next) => {
+}
+
+//checks if the dishes were put in an array
+//and there is least 1 dish in the array
+function orderHasDishes(req, res, next) {
   const { data: { dishes } = {} } = req.body;
   if (dishes.length > 0 && Array.isArray(dishes)) {
     return next();
@@ -103,14 +120,15 @@ const orderHasDishes = (req, res, next) => {
       message: `Dishes must be an array and contain more than one dish`,
     });
   }
-};
-const dishValidation = (req, res, next) => {
+}
+
+//checks if individual dish has a valid quantity
+function dishValidation(req, res, next) {
   const {
     data: { dishes },
   } = req.body;
-
-  // if a dish does not have a valid quantity
-  // return true, call next(error)
+  //if a dish does not have a valid quantity
+  //then an error will be returned
   for (const dish of dishes) {
     if (!dish.quantity || !Number.isInteger(dish.quantity)) {
       return next({
@@ -134,9 +152,11 @@ const dishValidation = (req, res, next) => {
   //   }
   // });
   // return next();
-};
+}
 
-const updateOrderIdIsValid = (req, res, next) => {
+//checks if the request to update order is valid
+//if there is an id in the request, checks if it matches with the order id
+function updateOrderIdIsValid(req, res, next) {
   const { data: { id } = {} } = req.body;
   const order = res.locals.order;
   if (id === null || id === undefined || !id || id === order.id) {
@@ -147,8 +167,10 @@ const updateOrderIdIsValid = (req, res, next) => {
       message: `Order id does not match route id. Order: ${order.id}, Route: ${id}.`,
     });
   }
-};
-const deleteRequestIsValid = (req, res, next) => {
+}
+
+//if the delete request is not for a pending order, return an error
+function deleteRequestIsValid(req, res, next) {
   if (res.locals.order.status !== "pending") {
     return next({
       status: 400,
@@ -157,7 +179,7 @@ const deleteRequestIsValid = (req, res, next) => {
   } else {
     return next();
   }
-};
+}
 module.exports = {
   list,
   create: [

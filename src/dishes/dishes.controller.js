@@ -4,11 +4,15 @@ const dishes = require(path.resolve("src/data/dishes-data"));
 // Use this function to assign ID's when necessary
 const nextId = require("../utils/nextId");
 
-const list = (req, res) => {
+/* CRUD functions */
+//lists all the current dishes in the data file
+function list(req, res) {
   res.json({ data: dishes });
-};
+}
 
-const create = (req, res) => {
+//creates a new dish
+//and assigns the dish with a passed in id or a randomized id
+function create(req, res) {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const newDish = {
     name,
@@ -19,13 +23,15 @@ const create = (req, res) => {
   };
   dishes.push(newDish);
   res.status(201).json({ data: newDish });
-};
+}
 
-const read = (req, res) => {
+//reads a dish information
+function read(req, res) {
   res.json({ data: res.locals.dish });
-};
+}
 
-const update = (req, res, next) => {
+//updates an existing dish
+function update(req, res, next) {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const dish = res.locals.dish;
 
@@ -35,9 +41,11 @@ const update = (req, res, next) => {
   dish.image_url = image_url;
 
   res.json({ data: dish });
-};
+}
 
-const dishExists = (req, res, next) => {
+/* Middlewares */
+//checks if the dish exists in the data file
+function dishExists(req, res, next) {
   const dishId = req.params.dishId;
   const dishFound = dishes.find((dish) => dish.id === dishId);
   if (dishFound) {
@@ -49,23 +57,11 @@ const dishExists = (req, res, next) => {
     status: 404,
     message: `Dish ID not found: ${dishId}`,
   });
-};
+}
 
-const dishDataIdIsValid = (req, res, next) => {
-  const { data: { id } = {} } = req.body;
-  const dish = res.locals.dish;
-  if (id === null || id === undefined || !id || id === dish.id) {
-    return next();
-  } else if (id !== dish.id) {
-    return next({
-      status: 400,
-      message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
-    });
-  }
-};
-
-const dishBodyDataHas = (propertyName) => {
-  return (req, res, next) => {
+//checks if the dish contains the passed in property name
+function dishHasProperty(propertyName) {
+  return function checkProperty(req, res, next) {
     const { data = {} } = req.body;
     if (data[propertyName]) {
       next();
@@ -73,7 +69,9 @@ const dishBodyDataHas = (propertyName) => {
     }
     next({ status: 400, message: `Must include a ${propertyName}` });
   };
-};
+}
+
+//checks if the dish price is more than 0 and it is a valid number
 const priceIsMoreThanZero = (req, res, next) => {
   const { data: { price } = {} } = req.body;
   if (price <= 0 || !Number.isInteger(price)) {
@@ -84,64 +82,40 @@ const priceIsMoreThanZero = (req, res, next) => {
   }
   next();
 };
-const dishHasAName = (req, res, next) => {
-  const { data: { name } = {} } = req.body;
-  if (name) {
-    next();
-    return;
+
+//checks if the request to update dish is valid
+//if there is an id in the request, checks if it matches with the dish id
+function updateDishIdIsValid(req, res, next) {
+  const { data: { id } = {} } = req.body;
+  const dish = res.locals.dish;
+  if (id === null || id === undefined || !id || id === dish.id) {
+    return next();
+  } else if (id !== dish.id) {
+    return next({
+      status: 400,
+      message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
+    });
   }
-  return next({
-    status: 400,
-    message: `A name is required for the dish`,
-  });
-};
-const dishDescriptionIsValid = (req, res, next) => {
-  const { data: { description } = {} } = req.body;
-  if (description) {
-    next();
-    return;
-  }
-  return next({
-    status: 400,
-    message: `A description of the dish is required`,
-  });
-};
-const dishImageURLIsValid = (req, res, next) => {
-  const { data: { image_url } = {} } = req.body;
-  if (image_url) {
-    next();
-    return;
-  }
-  return next({
-    status: 400,
-    message: `An image url of the dish is required`,
-  });
-};
+}
 module.exports = {
   list,
   create: [
-    dishBodyDataHas("name"),
-    dishBodyDataHas("description"),
-    dishBodyDataHas("image_url"),
-    dishBodyDataHas("price"),
+    dishHasProperty("name"),
+    dishHasProperty("description"),
+    dishHasProperty("image_url"),
+    dishHasProperty("price"),
     priceIsMoreThanZero,
-    dishHasAName,
-    dishDescriptionIsValid,
-    dishImageURLIsValid,
     create,
   ],
   read: [dishExists, read],
   update: [
     dishExists,
-    dishBodyDataHas("name"),
-    dishBodyDataHas("description"),
-    dishBodyDataHas("image_url"),
-    dishBodyDataHas("price"),
+    dishHasProperty("name"),
+    dishHasProperty("description"),
+    dishHasProperty("image_url"),
+    dishHasProperty("price"),
     priceIsMoreThanZero,
-    dishHasAName,
-    dishDescriptionIsValid,
-    dishImageURLIsValid,
-    dishDataIdIsValid,
+    updateDishIdIsValid,
     update,
   ],
 };
