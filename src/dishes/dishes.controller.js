@@ -59,20 +59,41 @@ function dishExists(req, res, next) {
   });
 }
 
-//checks if the dish contains the passed in property name
-function dishHasProperty(propertyName) {
-  return function checkProperty(req, res, next) {
-    const { data = {} } = req.body;
-    if (data[propertyName]) {
-      next();
-      return;
-    }
-    next({ status: 400, message: `Must include a ${propertyName}` });
-  };
+//checks if the dish contains name
+function dishHasName(req, res, next) {
+  const { data: { name } = {} } = req.body;
+  if (!name) {
+    return next({
+      status: 400,
+      message: `The dish must include a name`,
+    });
+  }
+  next();
 }
-
+//checks if the dish contains description
+function dishHasDescription(req, res, next) {
+  const { data: { description } = {} } = req.body;
+  if (!description) {
+    return next({
+      status: 400,
+      message: `The dish must include a description`,
+    });
+  }
+  next();
+}
+//checks if the dish contains image url
+function dishHasImageUrl(req, res, next) {
+  const { data: { image_url } = {} } = req.body;
+  if (!image_url) {
+    return next({
+      status: 400,
+      message: `The dish must include a image_url`,
+    });
+  }
+  next();
+}
 //checks if the dish price is more than 0 and it is a valid number
-const priceIsMoreThanZero = (req, res, next) => {
+function priceIsMoreThanZero(req, res, next) {
   const { data: { price } = {} } = req.body;
   if (price <= 0 || !Number.isInteger(price)) {
     return next({
@@ -81,16 +102,16 @@ const priceIsMoreThanZero = (req, res, next) => {
     });
   }
   next();
-};
+}
 
 //checks if the request to update dish is valid
 //if there is an id in the request, checks if it matches with the dish id
 function updateDishIdIsValid(req, res, next) {
   const { data: { id } = {} } = req.body;
   const dish = res.locals.dish;
-  if (id === null || id === undefined || !id || id === dish.id) {
+  if (!id || id === dish.id) {
     return next();
-  } else if (id !== dish.id) {
+  } else {
     return next({
       status: 400,
       message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
@@ -100,20 +121,18 @@ function updateDishIdIsValid(req, res, next) {
 module.exports = {
   list,
   create: [
-    dishHasProperty("name"),
-    dishHasProperty("description"),
-    dishHasProperty("image_url"),
-    dishHasProperty("price"),
+    dishHasName,
+    dishHasDescription,
+    dishHasImageUrl,
     priceIsMoreThanZero,
     create,
   ],
   read: [dishExists, read],
   update: [
     dishExists,
-    dishHasProperty("name"),
-    dishHasProperty("description"),
-    dishHasProperty("image_url"),
-    dishHasProperty("price"),
+    dishHasName,
+    dishHasDescription,
+    dishHasImageUrl,
     priceIsMoreThanZero,
     updateDishIdIsValid,
     update,

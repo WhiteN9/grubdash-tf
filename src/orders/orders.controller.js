@@ -69,7 +69,7 @@ function orderExists(req, res, next) {
   }
 }
 
-//checks if the order contains the passed in property name
+//checks if the order contains the deliverTo address
 function orderHasDeliverTo(req, res, next) {
   const { data: { deliverTo } = {} } = req.body;
   if (deliverTo) {
@@ -81,6 +81,7 @@ function orderHasDeliverTo(req, res, next) {
   });
 }
 
+//checks if the order contains the a mobile number
 function orderHasMobileNumber(req, res, next) {
   const { data: { mobileNumber } = {} } = req.body;
   if (mobileNumber) {
@@ -148,18 +149,6 @@ function dishValidation(req, res, next) {
     }
   }
   return next();
-
-  // trying to refactor this please don't count me down for it
-  // dishes.forEach((dish) => {
-  //   // console.log(dish.id);
-  //   if (!dish.quantity || Number.isInteger(dish.quantity)) {
-  //     return next({
-  //       status: 400,
-  //       message: `Dish ${dish.id} must have a quantity greater than 0`,
-  //     });
-  //   }
-  // });
-  // return next();
 }
 
 //checks if the request to update order is valid
@@ -202,10 +191,10 @@ module.exports = {
     orderExists,
     orderHasDeliverTo,
     orderHasMobileNumber,
-    updateOrderIdIsValid,
-    orderStatusIsValid,
     orderHasDishes,
     dishValidation,
+    updateOrderIdIsValid,
+    orderStatusIsValid,
     update,
   ],
   delete: [orderExists, deleteRequestIsValid, destroy],
