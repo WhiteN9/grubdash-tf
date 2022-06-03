@@ -6,13 +6,13 @@ const nextId = require("../utils/nextId");
 
 /* CRUD functions */
 //lists all the current dishes in the data file
-function list(req, res) {
+const list = (req, res) => {
   res.json({ data: dishes });
-}
+};
 
 //creates a new dish
 //and assigns the dish with a passed in id or a randomized id
-function create(req, res) {
+const create = (req, res) => {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const newDish = {
     name,
@@ -23,15 +23,15 @@ function create(req, res) {
   };
   dishes.push(newDish);
   res.status(201).json({ data: newDish });
-}
+};
 
 //reads a dish information
-function read(req, res) {
+const read = (req, res) => {
   res.json({ data: res.locals.dish });
-}
+};
 
 //updates an existing dish
-function update(req, res, next) {
+const update = (req, res, next) => {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const dish = res.locals.dish;
 
@@ -41,11 +41,11 @@ function update(req, res, next) {
   dish.image_url = image_url;
 
   res.json({ data: dish });
-}
+};
 
 /* Middlewares */
 //checks if the dish exists in the data file
-function dishExists(req, res, next) {
+const dishExists = (req, res, next) => {
   const dishId = req.params.dishId;
   const dishFound = dishes.find((dish) => dish.id === dishId);
   if (dishFound) {
@@ -57,10 +57,10 @@ function dishExists(req, res, next) {
     status: 404,
     message: `Dish ID not found: ${dishId}`,
   });
-}
+};
 
 //checks if the dish contains the passed in property name
-function dishHasProperty(propertyName) {
+const dishHasProperty = (propertyName) => {
   return function checkProperty(req, res, next) {
     const { data = {} } = req.body;
     if (data[propertyName]) {
@@ -69,7 +69,7 @@ function dishHasProperty(propertyName) {
     }
     next({ status: 400, message: `Must include a ${propertyName}` });
   };
-}
+};
 
 //checks if the dish price is more than 0 and it is a valid number
 const priceIsMoreThanZero = (req, res, next) => {
@@ -85,7 +85,7 @@ const priceIsMoreThanZero = (req, res, next) => {
 
 //checks if the request to update dish is valid
 //if there is an id in the request, checks if it matches with the dish id
-function updateDishIdIsValid(req, res, next) {
+const updateDishIdIsValid = (req, res, next) => {
   const { data: { id } = {} } = req.body;
   const dish = res.locals.dish;
   if (id === null || id === undefined || !id || id === dish.id) {
@@ -96,7 +96,7 @@ function updateDishIdIsValid(req, res, next) {
       message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
     });
   }
-}
+};
 module.exports = {
   list,
   create: [
