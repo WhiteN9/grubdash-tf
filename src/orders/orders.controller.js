@@ -70,18 +70,26 @@ function orderExists(req, res, next) {
 }
 
 //checks if the order contains the passed in property name
-function orderHasProperty(propertyName) {
-  return function checkProperty(req, res, next) {
-    const { data = {} } = req.body;
-    if (data[propertyName]) {
-      return next();
-    } else {
-      return next({
-        status: 400,
-        message: `Must include a ${propertyName}`,
-      });
-    }
-  };
+function orderHasDeliverTo(req, res, next) {
+  const { data: { deliverTo } = {} } = req.body;
+  if (deliverTo) {
+    return next();
+  }
+  next({
+    status: 400,
+    message: `The order needs deliverTo`,
+  });
+}
+
+function orderHasMobileNumber(req, res, next) {
+  const { data: { mobileNumber } = {} } = req.body;
+  if (mobileNumber) {
+    return next();
+  }
+  next({
+    status: 400,
+    message: `The order needs mobileNumber`,
+  });
 }
 
 //checks if the request to change order status is a valid status
@@ -111,7 +119,7 @@ function orderStatusIsValid(req, res, next) {
 //checks if the dishes were put in an array
 //and there is least 1 dish in the array
 function orderHasDishes(req, res, next) {
-  const { data: { dishes } = {} } = req.body;
+  const { data: { dishes = [] } = {} } = req.body;
   if (dishes.length > 0 && Array.isArray(dishes)) {
     return next();
   } else {
@@ -183,9 +191,8 @@ function deleteRequestIsValid(req, res, next) {
 module.exports = {
   list,
   create: [
-    orderHasProperty("deliverTo"),
-    orderHasProperty("mobileNumber"),
-    orderHasProperty("dishes"),
+    orderHasDeliverTo,
+    orderHasMobileNumber,
     orderHasDishes,
     dishValidation,
     create,
@@ -193,9 +200,8 @@ module.exports = {
   read: [orderExists, read],
   update: [
     orderExists,
-    orderHasProperty("deliverTo"),
-    orderHasProperty("mobileNumber"),
-    orderHasProperty("dishes"),
+    orderHasDeliverTo,
+    orderHasMobileNumber,
     updateOrderIdIsValid,
     orderStatusIsValid,
     orderHasDishes,
