@@ -140,18 +140,6 @@ function dishValidation(req, res, next) {
     }
   }
   return next();
-
-  // trying to refactor this please don't count me down for it
-  // dishes.forEach((dish) => {
-  //   // console.log(dish.id);
-  //   if (!dish.quantity || Number.isInteger(dish.quantity)) {
-  //     return next({
-  //       status: 400,
-  //       message: `Dish ${dish.id} must have a quantity greater than 0`,
-  //     });
-  //   }
-  // });
-  // return next();
 }
 
 //checks if the request to update order is valid

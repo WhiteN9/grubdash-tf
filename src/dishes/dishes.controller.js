@@ -97,6 +97,7 @@ function updateDishIdIsValid(req, res, next) {
     });
   }
 }
+
 module.exports = {
   list,
   create: [
