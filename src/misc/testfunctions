@@ -33,6 +33,25 @@ const dishImageURLIsValid = (req, res, next) => {
 };
 
 
+//checks if individual dish has a valid quantity
+const dishValidation(req, res, next) {
+  const {
+    data: { dishes },
+  } = req.body;
+  //if a dish does not have a valid quantity
+  //then an error will be returned
+  for (const dish of dishes) {
+    if (!dish.quantity || !Number.isInteger(dish.quantity)) {
+      return next({
+        status: 400,
+        message: `Dish ${dishes.indexOf(
+          dish
+        )} must have a quantity greater than 0`,
+      });
+    }
+  }
+  return next();
+  
   // trying to refactor this please don't count me down for it
   // dishes.forEach((dish) => {
   //   // console.log(dish.id);
@@ -44,3 +63,4 @@ const dishImageURLIsValid = (req, res, next) => {
   //   }
   // });
   // return next();
+}
