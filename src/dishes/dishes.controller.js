@@ -6,13 +6,13 @@ const nextId = require("../utils/nextId");
 
 /* CRUD functions */
 //lists all the current dishes in the data file
-const list = (req, res) => {
+function list(req, res) {
   res.json({ data: dishes });
-};
+}
 
 //creates a new dish
 //and assigns the dish with a passed in id or a randomized id
-const create = (req, res) => {
+function create(req, res) {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const newDish = {
     name,
@@ -23,15 +23,15 @@ const create = (req, res) => {
   };
   dishes.push(newDish);
   res.status(201).json({ data: newDish });
-};
+}
 
 //reads a dish information
-const read = (req, res) => {
+function read(req, res) {
   res.json({ data: res.locals.dish });
-};
+}
 
 //updates an existing dish
-const update = (req, res, next) => {
+function update(req, res, next) {
   const { data: { name, description, price, image_url, id } = {} } = req.body;
   const dish = res.locals.dish;
 
@@ -41,11 +41,11 @@ const update = (req, res, next) => {
   dish.image_url = image_url;
 
   res.json({ data: dish });
-};
+}
 
 /* Middlewares */
 //checks if the dish exists in the data file
-const dishExists = (req, res, next) => {
+function dishExists(req, res, next) {
   const dishId = req.params.dishId;
   const dishFound = dishes.find((dish) => dish.id === dishId);
   if (dishFound) {
@@ -57,7 +57,7 @@ const dishExists = (req, res, next) => {
     status: 404,
     message: `Dish ID not found: ${dishId}`,
   });
-};
+}
 
 //checks if the dish contains name
 function dishHasName(req, res, next) {
@@ -106,7 +106,7 @@ function priceIsMoreThanZero(req, res, next) {
 
 //checks if the request to update dish is valid
 //if there is an id in the request, checks if it matches with the dish id
-const updateDishIdIsValid = (req, res, next) => {
+function updateDishIdIsValid(req, res, next) {
   const { data: { id } = {} } = req.body;
   const dish = res.locals.dish;
   if (!id || id === dish.id) {
@@ -117,7 +117,8 @@ const updateDishIdIsValid = (req, res, next) => {
       message: `The current dish id '${dish.id}' does not match with new dish id '${id}'`,
     });
   }
-};
+}
+
 module.exports = {
   list,
   create: [
