@@ -32,9 +32,8 @@ const dishImageURLIsValid = (req, res, next) => {
   });
 };
 
-
 //checks if individual dish has a valid quantity
-const dishValidation(req, res, next) {
+const dishValidation = (req, res, next) => {
   const {
     data: { dishes },
   } = req.body;
@@ -51,7 +50,7 @@ const dishValidation(req, res, next) {
     }
   }
   return next();
-  
+
   // trying to refactor this please don't count me down for it
   // dishes.forEach((dish) => {
   //   // console.log(dish.id);
@@ -63,4 +62,4 @@ const dishValidation(req, res, next) {
   //   }
   // });
   // return next();
-}
+};
